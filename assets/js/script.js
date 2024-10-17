@@ -1,14 +1,13 @@
-
-const toggleButton = document.getElementById('toggleButton');             // Gets button toggle element
-const noteDisplay = document.getElementById('noteDisplay');               // Gets note display element
-const frequencyDisplay = document.getElementById('frequencyDisplay');     // Gets frequency display element
-const needle = document.getElementById('needle');                         // Gets tuner needle element
+const toggleButton = document.getElementById('toggleButton'); // Gets button toggle element
+const noteDisplay = document.getElementById('noteDisplay'); // Gets note display element
+const frequencyDisplay = document.getElementById('frequencyDisplay'); // Gets frequency display element
+const needle = document.getElementById('needle'); // Gets tuner needle element
 const flatSharpIndicator = document.getElementById('flatSharpIndicator'); // Gets element that displays whether sound is flat, sharp, or in tune
 
 
-let audioContext;        // Variable to hold audio context, for use in audio processing
-let analyser;            // Variable for the analyser node, to process audio input and frequency analyse
-let microphone;          // Variable to store mic input stream
+let audioContext; // Variable to hold audio context, for use in audio processing
+let analyser; // Variable for the analyser node, to process audio input and frequency analyse
+let microphone; // Variable to store mic input stream
 let isListening = false; // Variable to track whether tuner is listening to mic
 
 const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]; // Musical notes array
@@ -81,7 +80,15 @@ function stopListening() {
     setNeedle(0);
     frequencyBuffer = [];
     noteBuffer = [];
+    lastValidNote = null;
+    noteDisplayTimer = null;
 }
+
+// Variables for note persistence
+let lastValidNote = null;
+let noteDisplayTimer = null;
+const noteDisplayTimeout = 1000;
+
 
 /**
  * Function to update the pitch 
@@ -123,6 +130,9 @@ function updatePitch() {
         const mostFrequentNote = findMostFrequent(noteBuffer);
         if (mostFrequentNote) {
             noteDisplay.textContent = mostFrequentNote;
+            lastValidNote = mostFrequentNote;
+            clearTimeout(noteDisplayTimer);
+            noteDisplayTimer = null;
         }
 
         // Adjusts the needle and indicators of flatness/sharpness based on the pitch accuracy
@@ -130,14 +140,18 @@ function updatePitch() {
         updateFlatSharpIndicator(smoothedCents);
     } else {
         // Clears the display if there is no pitch detected
-        noteDisplay.textContent = '-';
-        frequencyDisplay.textContent = '- Hz';
-        flatSharpIndicator.textContent = '';
-        setNeedle(0);
-        frequencyBuffer = [];
-        noteBuffer = [];
+        if (lastValidNote && !noteDisplayTimer) {
+            noteDisplayTimer = setTimeout(() => {
+                if (!isListening) return;
+                noteDisplay.textContent = '-';
+                frequencyDisplay.textContent = '- Hz';
+                flatSharpIndicator.textContent = '';
+                setNeedle(0);
+                lastValidNote = null;
+            }, noteDisplayTimeout);
+        }
     }
-
+    
     if (isListening) {
         // Repeatedly updates pitch detection whilst tuner is active
         requestAnimationFrame(updatePitch);
