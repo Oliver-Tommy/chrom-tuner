@@ -4,11 +4,11 @@ const frequencyDisplay = document.getElementById('frequencyDisplay'); // Gets fr
 const needle = document.getElementById('needle'); // Gets tuner needle element
 const flatSharpIndicator = document.getElementById('flatSharpIndicator'); // Gets element that displays whether sound is flat, sharp, or in tune
 
-
 let audioContext; // Variable to hold audio context, for use in audio processing
 let analyser; // Variable for the analyser node, to process audio input and frequency analyse
 let microphone; // Variable to store mic input stream
 let isListening = false; // Variable to track whether tuner is listening to mic
+let animationFrameId = null; // Variable to store the animation frame id
 
 const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]; // Musical notes array
 
@@ -72,6 +72,9 @@ function stopListening() {
     if (audioContext) {
         audioContext.close();
     }
+    if (microphone) {
+        microphone.disconnect();
+    }
     isListening = false;
     toggleButton.textContent = 'Start Tuner';
     noteDisplay.textContent = '-';
@@ -81,14 +84,21 @@ function stopListening() {
     frequencyBuffer = [];
     noteBuffer = [];
     lastValidNote = null;
-    noteDisplayTimer = null;
+    if (noteDisplayTimer) {
+        clearTimeout(noteDisplayTimer);
+        noteDisplayTimer = null;
+    }
+    // Cancel pending animation frames
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
 }
 
 // Variables for note persistence
 let lastValidNote = null;
 let noteDisplayTimer = null;
 const noteDisplayTimeout = 1000;
-
 
 /**
  * Function to update the pitch 
@@ -151,10 +161,10 @@ function updatePitch() {
             }, noteDisplayTimeout);
         }
     }
-    
+
     if (isListening) {
         // Repeatedly updates pitch detection whilst tuner is active
-        requestAnimationFrame(updatePitch);
+        animationFrameId = requestAnimationFrame(updatePitch);
     }
 }
 
