@@ -1,0 +1,66 @@
+
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+.container {
+    text-align: center;
+    padding: 20px;
+    background-color: #333;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    color: white;
+}
+#toggleButton {
+    font-size: 18px;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+#noteDisplay {
+    font-size: 48px;
+    margin: 20px 0;
+}
+#frequencyDisplay {
+    font-size: 24px;
+    margin: 10px 0;
+}
+#tunerDisplay {
+    width: 300px;
+    height: 150px;
+    background-color: #222;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+#needle {
+    width: 2px;
+    height: 120px;
+    background-color: red;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform-origin: bottom center;
+    transition: transform 0.3s ease-out;
+}
+.marker {
+    position: absolute;
+    bottom: 0;
+    width: 2px;
+    height: 20px;
+    background-color: white;
+}
+#flatSharpIndicator {
+    font-size: 24px;
+    margin-top: 10px;
+}
